@@ -14,7 +14,7 @@ public class UserDao {
             pstmt.setString(1, name);
             pstmt.setString(2, email);
             pstmt.setString(3, password);
-            pstmt.setString(4, role);
+            pstmt.setString(4, role.toUpperCase());
             pstmt.setString(5, department);
             pstmt.setString(6, "PENDING");
             pstmt.executeUpdate();
@@ -92,6 +92,22 @@ public class UserDao {
         }
     }
 
+    // Matches tutorial implementation: updates role and status using parameterized PreparedStatement
+    public boolean updateUserRoleAndStatus(int userId, String newRole, String newStatus) {
+        String sql = "UPDATE users SET role = ?, status = ? WHERE id = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, newRole.toUpperCase());
+            pstmt.setString(2, newStatus.toUpperCase());
+            pstmt.setInt(3, userId);
+            int rowsAffected = pstmt.executeUpdate();
+            return rowsAffected > 0;
+        } catch (SQLException e) {
+            System.out.println("Error updating user: " + e.getMessage());
+            return false;
+        }
+    }
+
     public List<user> getUsersByStatus(String status) {
         if ("PENDING".equalsIgnoreCase(status)) {
             return getPendingUsers();
@@ -118,7 +134,7 @@ public class UserDao {
         String sql = "UPDATE users SET status = ? WHERE id = ?";
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, newStatus);
+            pstmt.setString(1, newStatus.toUpperCase());
             pstmt.setInt(2, userId);
             pstmt.executeUpdate();
             return true;
